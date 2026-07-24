@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { Preahvihear } from "next/font/google";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -40,83 +39,91 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full max-w-md rounded-2xl border bg-white p-8 shadow-sm">
-      <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-xl">
+    <div className="flex min-h-screen w-full justify-center items-center bg-[#fafafa]">
+      <div className="w-full max-w-md rounded-2xl border bg-white p-8 shadow-sm">
+        {/* <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-gray-100 text-xl">
         🛍️
-      </div>
-      <h1 className="text-2xl font-bold">Welcome back</h1>
-      <p className="mt-1 text-sm text-gray-500">Sign in to your account</p>
+      </div> */}
+        <h1 className="text-2xl text-black font-bold">Welcome back</h1>
+        <p className="mt-1 text-sm text-gray-500">Sign in to your account</p>
 
-      {status.error && (
-        <p className="mt-4 text-sm text-red-600">{status.error}</p>
-      )}
+        {status.error && (
+          <p className="mt-4 text-sm text-red-600">{status.error}</p>
+        )}
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        <div>
-          <label htmlFor="email" className="mb-1 block text-sm font-medium">
-            Email address
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            value={formData.email}
-            onChange={handleInputChange}
-            placeholder="you@example.com"
-            className="w-full border-b border-gray-300 pb-2 text-sm outline-none focus:border-gray-900"
-          />
-        </div>
-        <div>
-          <label htmlFor="password" className="mb-1 block text-sm font-medium">
-            Password
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            value={formData.password}
-            onChange={handleInputChange}
-            className="w-full border-b border-gray-300 pb-2 text-sm outline-none focus:border-gray-900"
-          />
-
-          <div className="mt-1 text-right">
-            <Link
-              href="/forgot-password"
-              className="text-xs text-gray-500 hover:underline"
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+          <div>
+            <label
+              htmlFor="email"
+              className="mb-1 block text-sm font-medium text-[#171717]"
             >
-              Forgot password?
-            </Link>
+              Email address
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              value={formData.email}
+              onChange={handleInputChange}
+              placeholder="you@example.com"
+              className="w-full border-b border-gray-300 pb-2 text-sm text-[#171717] placeholder:text-gray-500 outline-none focus:border-gray-900"
+            />
           </div>
+          <div>
+            <label
+              htmlFor="password"
+              className="mb-1 block text-sm font-medium text-[#171717]"
+            >
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              value={formData.password}
+              onChange={handleInputChange}
+              className="w-full border-b border-gray-300 pb-2 text-sm text-[#171717] outline-none focus:border-gray-900"
+            />
+
+            <div className="mt-1 text-right">
+              <Link
+                href="/forgot-password"
+                className="text-xs text-gray-500 hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={status.loading}
+            className="w-full rounded-lg bg-gray-900 py-3 text-sm font-medium text-white disabled:opacity-50"
+          >
+            {status.loading ? "Signing in..." : "Sign In"}
+          </button>
+        </form>
+
+        <div className="my-6 flex items-center gap-3 text-xs text-gray-400">
+          <div className="h-px flex-1 bg-gray-200" /> or{" "}
+          <div className="h-px flex-1 bg-gray-200" />
         </div>
-        <button
-          type="submit"
-          disabled={status.loading}
-          className="w-full rounded-lg bg-gray-900 py-3 text-sm font-medium text-white disabled:opacity-50"
-        >
-          {status.loading ? "Signing in..." : "Sign In"}
+
+        <button className="flex w-full items-center justify-center gap-2 bg-gray-50 rounded-lg shadow-md py-3 text-black text-xs font-semibold hover:bg-gray-100">
+          Continue with Google
         </button>
-      </form>
 
-      <div className="my-6 flex items-center gap-3 text-xs text-gray-400">
-        <div className="h-px flex-1 bg-gray-200" /> or{" "}
-        <div className="h-px flex-1 bg-gray-200" />
+        <p className="mt-6 text-center text-sm text-gray-500">
+          Don't have an account?{" "}
+          <Link
+            href="/register"
+            className="font-medium text-gray-900 hover:underline"
+          >
+            Sign up
+          </Link>
+        </p>
       </div>
-
-      <button className="flex w-full items-center justify-center gap-2 rounded-lg border py-3 text-sm font-medium hover:bg-gray-50">
-        Continue with Google
-      </button>
-
-      <p className="mt-6 text-center text-sm text-gray-500">
-        Don't have an account?{" "}
-        <Link
-          href="/register"
-          className="font-medium text-gray-900 hover:underline"
-        >
-          Sign up
-        </Link>
-      </p>
     </div>
   );
 }
