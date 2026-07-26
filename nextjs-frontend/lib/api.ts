@@ -1,4 +1,11 @@
-import { AuthUser, CartResponse, Product, ProductListResponse } from "./types";
+import type {
+  AuthUser,
+  CartResponse,
+  LoginInput,
+  Product,
+  ProductListResponse,
+  RegisterInput,
+} from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -39,17 +46,13 @@ export const getProducts = async (params: URLSearchParams) =>
 export const getProductBySlug = (slug: string) =>
   apiFetch<{ data: Product }>(`/api/products/${slug}`);
 
-export const registerUser = (input: {
-  name: string;
-  email: string;
-  password: string;
-}) =>
+export const registerUser = (input: RegisterInput) =>
   apiFetch<{ user: AuthUser; token: string }>("/api/auth/register", {
     method: "POST",
     body: JSON.stringify(input),
   });
 
-export const loginUser = (input: { email: string; password: string }) =>
+export const loginUser = (input: LoginInput) =>
   apiFetch<{ user: AuthUser; token: string }>("/api/auth/login", {
     method: "POST",
     body: JSON.stringify(input),

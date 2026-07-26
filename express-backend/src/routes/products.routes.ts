@@ -1,16 +1,23 @@
 import { Router } from "express";
 import { validate } from "../middleware/validate";
 import { asyncHandler } from "../middleware/errorHandler";
-import { listProductsQuerySchema, slugParamSchema } from "./products.schemas";
-import { listProducts, getProductBySlug } from "../controllers/products.controller";
+import { listProductsQuerySchema, slugParamSchema } from "@catalog/shared";
+import {
+  listProducts,
+  getProductBySlug,
+} from "../controllers/products.controller";
 
 const router = Router();
 
-router.get("/", validate(listProductsQuerySchema, "query"), asyncHandler(listProducts));
+router.get(
+  "/",
+  validate(listProductsQuerySchema, "query"),
+  asyncHandler(listProducts),
+);
 router.get(
   "/:slug",
   validate(slugParamSchema, "params"),
-  asyncHandler(getProductBySlug)
+  asyncHandler(getProductBySlug),
 );
 
 export default router;

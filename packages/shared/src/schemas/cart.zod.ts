@@ -12,3 +12,7 @@ export const updateCartItemSchema = z.object({
 export const productIdParamSchema = z.object({
   productId: z.coerce.number().int().positive(),
 });
+
+export type AddToCartInput = z.infer<typeof addToCartSchema>;
+export type ProductIdParam = z.infer<typeof productIdParamSchema>;
+export type UpdateCartItemInput = z.infer<typeof updateCartItemSchema>;

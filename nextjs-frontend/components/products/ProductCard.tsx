@@ -9,7 +9,13 @@ import { addToCart } from "@/lib/api";
 import { useCartCount } from "@/lib/cart-context";
 import type { Product } from "@/lib/types";
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  preload = false,
+}: {
+  product: Product;
+  preload?: boolean;
+}) {
   const [wishlisted, setWishlisted] = useState(false); // visual only — no wishlist table/endpoint exists
 
   return (
@@ -20,6 +26,7 @@ export function ProductCard({ product }: { product: Product }) {
             src={product.imageUrl}
             alt={product.name}
             fill
+            preload={preload}
             className="object-cover"
             sizes="(min-width: 1024px) 25vw, 50vw"
           />

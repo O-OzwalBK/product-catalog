@@ -42,23 +42,26 @@ export default async function ProductDetailPage({ params }: PageProps) {
           src={product.imageUrl}
           alt={product.name}
           fill
+          preload
+          // sizes="(min-width: 640px) 512px, 100vw"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover"
-          priority
         />
       </div>
 
       {/* The mock shows 3 gallery thumbnails — your schema stores one imageUrl per product,
           so this repeats it 3x as a placeholder. A real gallery needs a productImages table. */}
       <div className="mt-3 flex gap-2">
-        {[0, 1, 2].map((i) => (
+        {[0, 1, 2].map((index) => (
           <button
-            key={i}
+            key={index}
             className="relative h-16 w-16 overflow-hidden rounded-lg border-2 border-gray-900"
           >
             <Image
               src={product.imageUrl}
               alt=""
               fill
+              sizes="64px"
               className="object-cover"
             />
           </button>

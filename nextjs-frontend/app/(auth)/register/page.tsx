@@ -3,26 +3,39 @@
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useState } from "react";
+import { z } from "zod";
+import { registerFormSchema } from "@catalog/shared";
 import InputField from "@/components/ui/InputField";
+import { registerUser } from "@/lib/api";
 import { useRouter } from "next/navigation";
+
+type FormData = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  agreedToTerms: boolean;
+};
+
+type FieldErrors = Partial<Record<keyof FormData, string>>;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    fullName: "",
+  const [formData, setFormData] = useState<FormData>({
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
+    agreedToTerms: false,
   });
 
-  const [agreed, setAgreed] = useState(false);
-
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [status, setStatus] = useState<{
     loading: boolean;
     error: string | null;
   }>({ loading: false, error: null });
 
-  function handleInputChange(field: keyof typeof formData) {
+  function handleInputChange(field: keyof FormData) {
     return (value: string) => {
       setFormData((currentData) => ({
         ...currentData,
@@ -31,37 +44,68 @@ export default function RegisterPage() {
     };
   }
 
-  async function handleSubmit(event: React.SubmitEvent) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (formData.password !== formData.confirmPassword)
-      return setStatus((previousStatus) => ({
-        ...previousStatus,
-        error: "Passwords don't match.",
-      }));
-    if (!agreed)
-      return setStatus((previousStatus) => ({
-        ...previousStatus,
-        error: "Please agree to the Terms of Service and Privacy Policy.",
-      }));
-
+    // registerFormSchema replaces two things that used to live here as
+    // hand-written checks: "do the two password fields match?" and "did
+    // they tick the terms checkbox?" — plus it adds validation that never
+    // existed on this form before (name required, real email shape,
+    // 8-char password minimum), because those rules now come from the
+    // same schema the backend enforces.
+    const result = registerFormSchema.safeParse(formData);
+    if (!result.success) {
+      // Zod v4 deprecated `.flatten()` as an instance method — the
+      // replacement is the top-level `z.flattenError()` function. Same
+      // shape ({ fieldErrors, formErrors }), just called differently.
+      const { fieldErrors: errors } = z.flattenError(result.error);
+      setFieldErrors({
+        name: errors.name?.[0],
+        email: errors.email?.[0],
+        password: errors.password?.[0],
+        confirmPassword: errors.confirmPassword?.[0],
+        agreedToTerms: errors.agreedToTerms?.[0],
+      });
+      return;
+    }
+    setFieldErrors({});
     setStatus({ loading: true, error: null });
 
     try {
+      const { name, email, password } = result.data;
+
+      // This is the actual bug fix, not just the zod refactor: the
+      // original version of this component never called registerUser()
+      // at all — it went straight to signIn("credentials", ...), which
+      // runs the LOGIN flow (authorize() -> loginUser()) against an
+      // account that doesn't exist yet. It would always fail, and the
+      // error message ("Registered, but login failed") only made sense
+      // if a register call had happened first. It hadn't.
+      await registerUser({ name, email, password });
+
+      // Now that the account exists, sign in through the same
+      // Credentials provider everything else uses, so this page ends
+      // with a real NextAuth session (with backendToken) instead of a
+      // dead end.
       const response = await signIn("credentials", {
-        ...formData,
+        email,
+        password,
         redirect: false,
       });
       if (response?.error)
         throw new Error(
-          "Registered, but login failed — try logging in manually.",
+          "Registered, but sign-in failed — try logging in manually.",
         );
       router.push("/");
       router.refresh();
     } catch (error) {
-    } finally {
-      setStatus({ loading: false, error: null });
+      setStatus({
+        loading: false,
+        error: error instanceof Error ? error.message : "Something went wrong.",
+      });
+      return;
     }
+    setStatus({ loading: false, error: null });
   }
 
   return (
@@ -82,13 +126,14 @@ export default function RegisterPage() {
         <p className="mt-3 text-sm text-red-600">{status.error}</p>
       )}
 
-      <form onSubmit={handleSubmit} className="mt-4 space-y-3">
+      <form onSubmit={handleSubmit} className="mt-4 space-y-3" noValidate>
         <InputField
           label="Full name"
-          id="fullName"
-          value={formData.fullName}
-          onChange={handleInputChange("fullName")}
+          id="name"
+          value={formData.name}
+          onChange={handleInputChange("name")}
           placeholder="Jane Doe"
+          error={fieldErrors.name}
         />
         <InputField
           label="Email address"
@@ -97,17 +142,17 @@ export default function RegisterPage() {
           value={formData.email}
           onChange={handleInputChange("email")}
           placeholder="you@example.com"
+          error={fieldErrors.email}
         />
 
         <InputField
           label="Password"
           id="password"
           type="password"
-          required
-          minLength={8}
           value={formData.password}
           onChange={handleInputChange("password")}
           showPasswordToggle
+          error={fieldErrors.password}
         />
 
         <InputField
@@ -117,24 +162,34 @@ export default function RegisterPage() {
           value={formData.confirmPassword}
           onChange={handleInputChange("confirmPassword")}
           showPasswordToggle
+          error={fieldErrors.confirmPassword}
         />
 
-        <label className="flex items-start gap-2 text-sm text-gray-600">
-          <input
-            type="checkbox"
-            checked={agreed}
-            onChange={(e) => setAgreed(e.target.checked)}
-            className="mt-0.5"
-          />
-          I agree to the{" "}
-          <Link href="/terms" className="underline">
-            Terms of Service
-          </Link>{" "}
-          and{" "}
-          <Link href="/privacy" className="underline">
-            Privacy Policy
-          </Link>
-        </label>
+        <div>
+          <label className="flex items-start gap-2 text-sm text-gray-600">
+            <input
+              type="checkbox"
+              checked={formData.agreedToTerms}
+              onChange={(e) =>
+                setFormData((d) => ({ ...d, agreedToTerms: e.target.checked }))
+              }
+              className="mt-0.5"
+            />
+            I agree to the{" "}
+            <Link href="/terms" className="underline">
+              Terms of Service
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="underline">
+              Privacy Policy
+            </Link>
+          </label>
+          {fieldErrors.agreedToTerms && (
+            <p className="mt-1 text-xs text-red-600">
+              {fieldErrors.agreedToTerms}
+            </p>
+          )}
+        </div>
 
         <button
           type="submit"

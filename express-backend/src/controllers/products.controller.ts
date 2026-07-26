@@ -1,20 +1,24 @@
 import { Request, Response } from "express";
-import { and, or, ilike, gte, lte, inArray, asc, desc, sql, eq } from "drizzle-orm";
+import {
+  and,
+  or,
+  ilike,
+  gte,
+  lte,
+  inArray,
+  asc,
+  desc,
+  sql,
+  eq,
+} from "drizzle-orm";
 import { db } from "../db";
 import { products } from "../db/schema";
 import { AppError } from "../utils/AppError";
+import type { ListProductsQuery } from "@catalog/shared";
 
 export async function listProducts(req: Request, res: Response) {
   const { search, category, minPrice, maxPrice, sort, page, limit } =
-    req.validatedQuery as unknown as {
-      search?: string;
-      category?: string[];
-      minPrice?: number;
-      maxPrice?: number;
-      sort?: "price_asc" | "price_desc" | "rating_desc";
-      page: number;
-      limit: number;
-    };
+    req.validatedQuery as unknown as ListProductsQuery;
 
   // Build up the WHERE clause piece by piece, only including filters that
   // were actually provided. `and(...conditions)` with an empty array just
@@ -27,8 +31,8 @@ export async function listProducts(req: Request, res: Response) {
     conditions.push(
       or(
         ilike(products.name, `%${search}%`),
-        ilike(products.shortDescription, `%${search}%`)
-      )
+        ilike(products.shortDescription, `%${search}%`),
+      ),
     );
   }
 
@@ -50,10 +54,10 @@ export async function listProducts(req: Request, res: Response) {
     sort === "price_asc"
       ? [asc(products.price)]
       : sort === "price_desc"
-      ? [desc(products.price)]
-      : sort === "rating_desc"
-      ? [desc(products.rating)]
-      : [desc(products.createdAt)]; // sensible default: newest first
+        ? [desc(products.price)]
+        : sort === "rating_desc"
+          ? [desc(products.rating)]
+          : [desc(products.createdAt)]; // sensible default: newest first
 
   const offset = (page - 1) * limit;
 
@@ -96,7 +100,11 @@ export async function getProductBySlug(req: Request, res: Response) {
     .limit(1);
 
   if (!product) {
-    throw new AppError(404, "PRODUCT_NOT_FOUND", `No product found with slug "${slug}"`);
+    throw new AppError(
+      404,
+      "PRODUCT_NOT_FOUND",
+      `No product found with slug "${slug}"`,
+    );
   }
 
   res.status(200).json({ data: product });

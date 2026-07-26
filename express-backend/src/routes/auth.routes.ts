@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { validate } from "../middleware/validate";
 import { asyncHandler } from "../middleware/errorHandler";
-import { registerSchema, loginSchema } from "./auth.schemas";
+import { registerSchema, loginSchema } from "@catalog/shared";
 import { register, login } from "../controllers/auth.controller";
 
 const router = Router();

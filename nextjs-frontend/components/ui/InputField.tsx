@@ -7,6 +7,7 @@ type InputFieldProps = Omit<
   label: string;
   onChange: (value: string) => void;
   showPasswordToggle?: boolean;
+  error?: string;
 };
 
 export default function InputField({
@@ -16,6 +17,7 @@ export default function InputField({
   className = "",
   showPasswordToggle = false,
   type = "text",
+  error,
   ...props
 }: InputFieldProps) {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -36,7 +38,8 @@ export default function InputField({
           id={id}
           type={inputType}
           onChange={(event) => onChange(event.target.value)}
-          className={`w-full p-2 border border-gray-300 rounded-md text-sm text-black outline-none shadow-xs focus:border-gray-500 placeholder:text-gray-500 ${hasPasswordToggle ? "pr-12" : ""} ${className}`.trim()}
+          aria-invalid={error ? true : undefined}
+          className={`w-full p-2 border rounded-md text-sm text-black outline-none shadow-xs focus:border-gray-500 placeholder:text-gray-500 ${error ? "border-red-400" : "border-gray-300"} ${hasPasswordToggle ? "pr-12" : ""} ${className}`.trim()}
         />
         {hasPasswordToggle && (
           <button
@@ -49,6 +52,7 @@ export default function InputField({
           </button>
         )}
       </div>
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );
 }

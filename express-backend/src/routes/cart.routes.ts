@@ -6,7 +6,7 @@ import {
   addToCartSchema,
   updateCartItemSchema,
   productIdParamSchema,
-} from "./cart.schemas";
+} from "@catalog/shared";
 import {
   getCart,
   addToCart,
@@ -26,12 +26,12 @@ router.patch(
   "/:productId",
   validate(productIdParamSchema, "params"),
   validate(updateCartItemSchema),
-  asyncHandler(updateCartItem)
+  asyncHandler(updateCartItem),
 );
 router.delete(
   "/:productId",
   validate(productIdParamSchema, "params"),
-  asyncHandler(removeCartItem)
+  asyncHandler(removeCartItem),
 );
 
 export default router;
