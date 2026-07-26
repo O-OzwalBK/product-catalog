@@ -1,14 +1,9 @@
 import { Request, Response, NextFunction } from "express";
-import { ZodSchema } from "zod";
+import { ZodType } from "zod";
 import { AppError } from "../utils/AppError";
 
 type Source = "body" | "query" | "params";
 
-// Express 5 turned req.query into a getter with no backing store — it
-// re-parses the raw URL on every access instead of returning a cached
-// object, so anything we assign onto req.query is silently thrown away.
-// req.body and req.params are still plain writable properties, so only
-// "query" needs this workaround; validated query data lives here instead.
 declare global {
   namespace Express {
     interface Request {
@@ -24,7 +19,7 @@ declare global {
  * Either way, string query params like "minPrice=10" arrive at the
  * controller already coerced to real types (number, array, etc).
  */
-export function validate(schema: ZodSchema, source: Source = "body") {
+export function validate(schema: ZodType, source: Source = "body") {
   return (req: Request, _res: Response, next: NextFunction) => {
     const result = schema.safeParse(req[source]);
 
