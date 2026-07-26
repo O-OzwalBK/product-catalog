@@ -1,10 +1,10 @@
 {
-  "name": "product-catalog-backend",
+  "name": "@catalog/backend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "db:generate": "drizzle-kit generate",
@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@catalog/shared": "workspace:*",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",

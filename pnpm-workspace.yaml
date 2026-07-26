@@ -1,4 +1,10 @@
+packages:
+  - "express-backend"
+  - "nextjs-frontend"
+  - "packages/*"
+
 allowBuilds:
+  esbuild: true
   sharp: false
   unrs-resolver: false
 ignoredBuiltDependencies:

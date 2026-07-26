@@ -1,14 +1,16 @@
 {
-  "name": "product-catalog",
+  "name": "@catalog/frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@catalog/shared": "workspace:*",
     "google-icon": "^1.0.1",
     "lucide-react": "^1.26.0",
     "next": "16.2.11",

@@ -1,0 +1,16 @@
+{
+  "name": "product-catalog",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "pnpm --recursive --parallel dev",
+    "build": "pnpm --recursive build",
+    "typecheck": "pnpm --recursive typecheck",
+    "db:generate": "pnpm --filter @catalog/backend db:generate",
+    "db:migrate": "pnpm --filter @catalog/backend db:migrate",
+    "db:seed": "pnpm --filter @catalog/backend db:seed"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}

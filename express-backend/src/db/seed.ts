@@ -192,13 +192,10 @@ async function seed() {
   // editing a product above updates the row instead of erroring on the
   // duplicate slug or creating a second copy.
   for (const product of sampleProducts) {
-    await db
-      .insert(products)
-      .values(product)
-      .onConflictDoUpdate({
-        target: products.slug,
-        set: product,
-      });
+    await db.insert(products).values(product).onConflictDoUpdate({
+      target: products.slug,
+      set: product,
+    });
   }
 
   console.log("Seed complete.");
