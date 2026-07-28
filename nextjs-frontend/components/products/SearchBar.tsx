@@ -22,6 +22,7 @@ export default function SearchBar({
 
   // update the URL when debounced search term changes
   useEffect(() => {
+    // stop if the URL already matches the debounced input
     if (debouncedText === (searchParams.get("search") ?? "")) return;
     const params = new URLSearchParams(
       pathname === "/" ? searchParams.toString() : "",
@@ -35,7 +36,7 @@ export default function SearchBar({
     params.delete("page");
 
     router.push(`/?${params.toString()}`);
-  }, [debouncedText, pathname, router, searchParams]);
+  }, [debouncedText, pathname, router]);
 
   // sync the input field if the URL changes externally (e.g., Browser Back button)
   useEffect(() => {

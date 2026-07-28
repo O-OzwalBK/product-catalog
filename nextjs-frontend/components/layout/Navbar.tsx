@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Bell, ShoppingCart, User } from "lucide-react";
 
-import SearchBar from "../SearchBar";
+import SearchBar from "../products/SearchBar";
 import { FiltersPopoverTrigger } from "./FiltersPopoverTrigger";
 import { useCartCount } from "@/lib/cart-context";
 
