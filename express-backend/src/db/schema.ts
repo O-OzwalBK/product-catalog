@@ -49,8 +49,10 @@ export const cartItems = pgTable(
   (table) => [unique("user_product_unique").on(table.userId, table.productId)],
 );
 
-// Relations let us write db.query.cartItems.findMany({ with: { product: true } })
-// instead of hand-writing joins every time.
+/*
+Relations let us write db.query.cartItems.findMany({ with: { product: true } })
+instead of hand-writing joins every time.
+*/
 export const usersRelations = relations(users, ({ many }) => ({
   cartItems: many(cartItems),
 }));

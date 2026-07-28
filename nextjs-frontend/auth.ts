@@ -34,7 +34,7 @@
 //       },
 //     }),
 //   ],
-//   session: { strategy: "jwt" }, // no session table needed — mirrors the backend's own stateless JWT approach
+//   session: { strategy: "jwt" },
 //   callbacks: {
 //     async jwt({ token, user }) {
 //       // `user` only exists on the initial sign-in call — persist the backend

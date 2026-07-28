@@ -47,17 +47,8 @@ export default function RegisterPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    // registerFormSchema replaces two things that used to live here as
-    // hand-written checks: "do the two password fields match?" and "did
-    // they tick the terms checkbox?" — plus it adds validation that never
-    // existed on this form before (name required, real email shape,
-    // 8-char password minimum), because those rules now come from the
-    // same schema the backend enforces.
     const result = registerFormSchema.safeParse(formData);
     if (!result.success) {
-      // Zod v4 deprecated `.flatten()` as an instance method — the
-      // replacement is the top-level `z.flattenError()` function. Same
-      // shape ({ fieldErrors, formErrors }), just called differently.
       const { fieldErrors: errors } = z.flattenError(result.error);
       setFieldErrors({
         name: errors.name?.[0],
@@ -74,19 +65,8 @@ export default function RegisterPage() {
     try {
       const { name, email, password } = result.data;
 
-      // This is the actual bug fix, not just the zod refactor: the
-      // original version of this component never called registerUser()
-      // at all — it went straight to signIn("credentials", ...), which
-      // runs the LOGIN flow (authorize() -> loginUser()) against an
-      // account that doesn't exist yet. It would always fail, and the
-      // error message ("Registered, but login failed") only made sense
-      // if a register call had happened first. It hadn't.
       await registerUser({ name, email, password });
 
-      // Now that the account exists, sign in through the same
-      // Credentials provider everything else uses, so this page ends
-      // with a real NextAuth session (with backendToken) instead of a
-      // dead end.
       const response = await signIn("credentials", {
         email,
         password,
@@ -109,7 +89,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="w-full max-w-md rounded-2xl border bg-white p-6 sm:p-8 shadow-sm">
+    <div className="w-full max-w-md rounded-2xl bg-white p-6 sm:p-8 shadow-xl">
       <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 text-lg">
         👤
       </div>

@@ -9,14 +9,14 @@ import {
 import { useSession } from "next-auth/react";
 import { getCart } from "@/lib/api";
 
-const CartCountContext = createContext<{ count: number; refresh: () => void }>({
-  count: 0,
+const CartCountContext = createContext<{ countInCart: number; refresh: () => void }>({
+  countInCart: 0,
   refresh: () => {},
 });
 
 export function CartCountProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
-  const [count, setCount] = useState(0);
+  const [countInCart, setCount] = useState(0);
 
   const refresh = useCallback(async () => {
     if (!session?.backendToken) {
@@ -32,7 +32,7 @@ export function CartCountProvider({ children }: { children: React.ReactNode }) {
   }, [status, refresh]);
 
   return (
-    <CartCountContext.Provider value={{ count, refresh }}>
+    <CartCountContext.Provider value={{ countInCart, refresh }}>
       {children}
     </CartCountContext.Provider>
   );
