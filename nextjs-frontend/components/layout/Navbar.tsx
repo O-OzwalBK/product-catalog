@@ -7,6 +7,7 @@ import { Bell, ShoppingCart, User } from "lucide-react";
 import SearchBar from "../products/SearchBar";
 import { FiltersPopoverTrigger } from "./FiltersPopoverTrigger";
 import { useCartCount } from "@/lib/cart-context";
+import { Suspense } from "react";
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -21,11 +22,14 @@ export default function Navbar() {
           </span>
           ShopCo
         </Link>
-
-        <SearchBar />
+        <Suspense fallback={<div>Loading search...</div>}>
+          <SearchBar />
+        </Suspense>
 
         <div className="ml-auto flex items-center gap-4">
-          <FiltersPopoverTrigger />
+          <Suspense fallback={<div>Loading filters...</div>}>
+            <FiltersPopoverTrigger />
+          </Suspense>
 
           <button
             aria-label="Notifications"

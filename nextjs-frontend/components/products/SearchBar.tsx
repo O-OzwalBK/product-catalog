@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import useDebounce from "@/hooks/useDebounce";
-import { PARAM_SEPARATOR } from "next/dist/lib/route-pattern-normalizer";
 import { Search } from "lucide-react";
 
 export default function SearchBar({

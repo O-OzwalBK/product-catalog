@@ -3,6 +3,7 @@ import { ProductGrid } from "@/components/products/ProductGrid";
 import { CategoryPills } from "@/components/products/CategoryPills";
 import { SortMenu } from "@/components/products/SortMenu";
 import { Pagination } from "@/components/products/Pagination";
+import { Suspense } from "react";
 
 interface PageProps {
   searchParams: Promise<Record<string, string | undefined>>;
@@ -25,16 +26,22 @@ export default async function HomePage({ searchParams }: PageProps) {
       <p className="text-sm text-gray-500">Discover</p>
       <h1 className="text-3xl font-bold">Catalog</h1>
       <div className="mt-4">
-        <CategoryPills />
+        <Suspense fallback={<div>Loading Categories...</div>}>
+          <CategoryPills />
+        </Suspense>
       </div>
       <div className="mt-4 flex items-center justify-between">
         <p className="text-sm text-gray-500">{pagination.total} results</p>
-        <SortMenu />
+        <Suspense fallback={<div>Loading sort menu...</div>}>
+          <SortMenu />
+        </Suspense>
       </div>
       <div className="mt-6">
         <ProductGrid products={products} />
       </div>
-      <Pagination pagination={pagination} />
+      <Suspense fallback={<div>...</div>}>
+        <Pagination pagination={pagination} />
+      </Suspense>
     </div>
   );
 }
