@@ -1,10 +1,20 @@
 import { Router } from "express";
+import { requireAuth } from "../middleware/auth";
 import { validate } from "../middleware/validate";
 import { asyncHandler } from "../middleware/errorHandler";
-import { listProductsQuerySchema, slugParamSchema } from "@catalog/shared";
+import {
+  listProductsQuerySchema,
+  slugParamSchema,
+  createProductSchema,
+  updateProductSchema,
+  productIdParamSchema,
+} from "@catalog/shared";
 import {
   listProducts,
   getProductBySlug,
+  createProduct,
+  updateProduct,
+  deleteProduct,
 } from "../controllers/products.controller";
 
 const router = Router();
@@ -20,4 +30,26 @@ router.get(
   asyncHandler(getProductBySlug),
 );
 
+// Protected Admin Mutation Routes
+router.post(
+  "/",
+  requireAuth,
+  validate(createProductSchema),
+  asyncHandler(createProduct),
+);
+
+router.patch(
+  "/:id",
+  requireAuth,
+  validate(productIdParamSchema, "params"),
+  validate(updateProductSchema),
+  asyncHandler(updateProduct),
+);
+
+router.delete(
+  "/:id",
+  requireAuth,
+  validate(productIdParamSchema, "params"),
+  asyncHandler(deleteProduct),
+);
 export default router;

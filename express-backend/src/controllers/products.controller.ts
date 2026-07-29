@@ -57,7 +57,7 @@ export async function listProducts(req: Request, res: Response) {
         ? [desc(products.price)]
         : sort === "rating_desc"
           ? [desc(products.rating)]
-          : [desc(products.createdAt)]; // sensible default: newest first
+          : [desc(products.createdAt)];
 
   const offset = (page - 1) * limit;
 
@@ -108,4 +108,118 @@ export async function getProductBySlug(req: Request, res: Response) {
   }
 
   res.status(200).json({ data: product });
+}
+export async function createProduct(req: Request, res: Response) {
+  const {
+    name,
+    category,
+    price,
+    stock,
+    shortDescription,
+    longDescription,
+    imageUrl,
+    rating,
+  } = req.body;
+
+  let slug = req.body.slug;
+  if (!slug) {
+    slug = name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+  }
+
+  // Ensure unique slug collision resolution
+  const existingSlug = await db.query.products.findFirst({
+    where: eq(products.slug, slug),
+  });
+
+  if (existingSlug) {
+    slug = `${slug}-${Date.now()}`;
+  }
+
+  const [product] = await db
+    .insert(products)
+    .values({
+      name,
+      slug,
+      category,
+      price: String(price),
+      stock: Number(stock),
+      shortDescription,
+      longDescription: longDescription || "No detailed description provided.",
+      imageUrl,
+      rating: rating !== undefined ? String(rating) : "0",
+    })
+    .returning();
+
+  res.status(201).json({ data: product });
+}
+
+export async function updateProduct(req: Request, res: Response) {
+  const id = Number(req.params.id);
+  const {
+    name,
+    slug,
+    category,
+    price,
+    stock,
+    shortDescription,
+    longDescription,
+    imageUrl,
+    rating,
+  } = req.body;
+
+  const existing = await db.query.products.findFirst({
+    where: eq(products.id, id),
+  });
+
+  if (!existing) {
+    throw new AppError(
+      404,
+      "PRODUCT_NOT_FOUND",
+      `No product found with ID ${id}`,
+    );
+  }
+
+  const updateData: Record<string, any> = {};
+  if (name !== undefined) updateData.name = name;
+  if (slug !== undefined) updateData.slug = slug;
+  if (category !== undefined) updateData.category = category;
+  if (price !== undefined) updateData.price = String(price);
+  if (stock !== undefined) updateData.stock = Number(stock);
+  if (shortDescription !== undefined)
+    updateData.shortDescription = shortDescription;
+  if (longDescription !== undefined)
+    updateData.longDescription = longDescription;
+  if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+  if (rating !== undefined) updateData.rating = String(rating);
+
+  const [updated] = await db
+    .update(products)
+    .set(updateData)
+    .where(eq(products.id, id))
+    .returning();
+
+  res.status(200).json({ data: updated });
+}
+
+export async function deleteProduct(req: Request, res: Response) {
+  const id = Number(req.params.id);
+
+  const deleted = await db
+    .delete(products)
+    .where(eq(products.id, id))
+    .returning({ id: products.id });
+
+  if (deleted.length === 0) {
+    throw new AppError(
+      404,
+      "PRODUCT_NOT_FOUND",
+      `No product found with ID ${id}`,
+    );
+  }
+
+  res.status(204).send();
 }

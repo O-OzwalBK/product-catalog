@@ -1,10 +1,13 @@
 import type {
   AuthUser,
   CartResponse,
+  CreateProductInput,
   LoginInput,
   Product,
   ProductListResponse,
   RegisterInput,
+  UpdateCartItemInput,
+  UpdateProductInput,
 } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -45,6 +48,30 @@ export const getProducts = async (params: URLSearchParams) =>
 
 export const getProductBySlug = (slug: string) =>
   apiFetch<{ data: Product }>(`/api/products/${slug}`);
+
+export const createProduct = (token: string, input: CreateProductInput) =>
+  apiFetch<{ data: Product }>("/api/products", {
+    method: "POST",
+    token,
+    body: JSON.stringify(input),
+  });
+
+export const updateProduct = (
+  token: string,
+  id: number,
+  input: UpdateProductInput,
+) =>
+  apiFetch<{ data: Product }>(`/api/products/${id}`, {
+    method: "PATCH",
+    token,
+    body: JSON.stringify(input),
+  });
+
+export const deleteProduct = (token: string, id: number) =>
+  apiFetch(`/api/products/${id}`, {
+    method: "DELETE",
+    token,
+  });
 
 export const registerUser = (input: RegisterInput) =>
   apiFetch<{ user: AuthUser; token: string }>("/api/auth/register", {
