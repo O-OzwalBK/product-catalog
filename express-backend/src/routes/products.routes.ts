@@ -17,6 +17,12 @@ import {
   deleteProduct,
 } from "../controllers/products.controller";
 
+console.log({
+  productIdParamSchema,
+  createProductSchema,
+  updateProductSchema,
+});
+
 const router = Router();
 
 router.get(
@@ -39,7 +45,7 @@ router.post(
 );
 
 router.patch(
-  "/:id",
+  "/:productId",
   requireAuth,
   validate(productIdParamSchema, "params"),
   validate(updateProductSchema),
@@ -47,7 +53,7 @@ router.patch(
 );
 
 router.delete(
-  "/:id",
+  "/:productId",
   requireAuth,
   validate(productIdParamSchema, "params"),
   asyncHandler(deleteProduct),

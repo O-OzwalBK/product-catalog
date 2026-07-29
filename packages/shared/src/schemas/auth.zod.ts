@@ -9,8 +9,8 @@ export const registerSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
   email: z.email("Must be a valid email"),
   password: z.string().min(8, "Password must be at least 8 characters"),
+  role: z.enum(["user", "merchant"]).default("user"),
 });
-
 
 /*
 Frontend-only extension

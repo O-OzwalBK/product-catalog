@@ -9,7 +9,7 @@ import { AppError } from "../utils/AppError";
 const SALT_ROUNDS = 10;
 
 export async function register(req: Request, res: Response) {
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body;
 
   const existing = await db.query.users.findFirst({
     where: eq(users.email, email),
@@ -27,10 +27,19 @@ export async function register(req: Request, res: Response) {
 
   const [user] = await db
     .insert(users)
-    .values({ name, email, passwordHash })
-    .returning({ id: users.id, name: users.name, email: users.email });
+    .values({ name, email, passwordHash, role })
+    .returning({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      role: users.role,
+    });
 
-  const token = signToken({ userId: user.id, email: user.email });
+  const token = signToken({
+    userId: user.id,
+    email: user.email,
+    role: user.role as "user" | "merchant",
+  });
 
   res.status(201).json({ user, token });
 }
@@ -51,10 +60,13 @@ export async function login(req: Request, res: Response) {
     throw new AppError(401, "INVALID_CREDENTIALS", "Invalid email or password");
   }
 
-  const token = signToken({ userId: user.id, email: user.email });
+  const token = signToken({
+    userId: user.id,
+    email: user.email,
+    role: user.role as "user" | "merchant",
+  });
 
   res.status(200).json({
-    user: { id: user.id, name: user.name, email: user.email },
-    token,
+    user: { id: user.id, name: user.name, email: user.email, role: user.role },
   });
 }

@@ -3,6 +3,7 @@ import {
   serial,
   uuid,
   text,
+  varchar,
   numeric,
   integer,
   timestamp,
@@ -15,11 +16,14 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   name: text("name").notNull(),
+  role: varchar("role", { enum: ["user", "merchant"] })
+    .default("user")
+    .notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const products = pgTable("products", {
-  id: serial("id").primaryKey(),
+  productId: serial("id").primaryKey(),
   slug: text("slug").notNull().unique(),
   name: text("name").notNull(),
   category: text("category").notNull(),
@@ -41,7 +45,7 @@ export const cartItems = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     productId: integer("product_id")
       .notNull()
-      .references(() => products.id, { onDelete: "cascade" }),
+      .references(() => products.productId, { onDelete: "cascade" }),
     quantity: integer("quantity").notNull().default(1),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -65,7 +69,7 @@ export const cartItemsRelations = relations(cartItems, ({ one }) => ({
   user: one(users, { fields: [cartItems.userId], references: [users.id] }),
   product: one(products, {
     fields: [cartItems.productId],
-    references: [products.id],
+    references: [products.productId],
   }),
 }));
 

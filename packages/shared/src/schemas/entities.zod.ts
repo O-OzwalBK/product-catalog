@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const productSchema = z.object({
-  id: z.number().int().positive(),
+  productId: z.number().int().positive(),
   stock: z.number().int().nonnegative(),
   name: z.string().min(1, "Name is required."),
   slug: z.string().min(1),
@@ -44,6 +44,7 @@ export const authUserSchema = z.object({
   id: z.string(), // uuid
   name: z.string(),
   email: z.email(),
+  role: z.enum(["user", "merchant"]),
 });
 
 export type AuthUser = z.infer<typeof authUserSchema>;

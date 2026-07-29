@@ -158,7 +158,7 @@ export async function createProduct(req: Request, res: Response) {
 }
 
 export async function updateProduct(req: Request, res: Response) {
-  const id = Number(req.params.id);
+  const productId = Number(req.params.productId);
   const {
     name,
     slug,
@@ -172,14 +172,14 @@ export async function updateProduct(req: Request, res: Response) {
   } = req.body;
 
   const existing = await db.query.products.findFirst({
-    where: eq(products.id, id),
+    where: eq(products.productId, productId),
   });
 
   if (!existing) {
     throw new AppError(
       404,
       "PRODUCT_NOT_FOUND",
-      `No product found with ID ${id}`,
+      `No product found with ID ${productId}`,
     );
   }
 
@@ -199,25 +199,25 @@ export async function updateProduct(req: Request, res: Response) {
   const [updated] = await db
     .update(products)
     .set(updateData)
-    .where(eq(products.id, id))
+    .where(eq(products.productId, productId))
     .returning();
 
   res.status(200).json({ data: updated });
 }
 
 export async function deleteProduct(req: Request, res: Response) {
-  const id = Number(req.params.id);
+  const productId = Number(req.params.productId);
 
   const deleted = await db
     .delete(products)
-    .where(eq(products.id, id))
-    .returning({ id: products.id });
+    .where(eq(products.productId, productId))
+    .returning({ productId: products.productId });
 
   if (deleted.length === 0) {
     throw new AppError(
       404,
       "PRODUCT_NOT_FOUND",
-      `No product found with ID ${id}`,
+      `No product found with ID ${productId}`,
     );
   }
 

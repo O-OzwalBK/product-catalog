@@ -34,6 +34,26 @@ async function apiFetch<T>(
 
   if (!response.ok) {
     const body = await response.json().catch(() => null);
+
+    // Safely extract string message from any error structure
+    let errorMessage = `Request failed with status ${response.status}`;
+
+    if (body) {
+      if (typeof body.error === "string") {
+        errorMessage = body.error;
+      } else if (typeof body.error?.message === "string") {
+        errorMessage = body.error.message;
+      } else if (typeof body.message === "string") {
+        errorMessage = body.message;
+      } else if (Array.isArray(body.errors)) {
+        errorMessage = body.errors
+          .map((e: any) => e.message || JSON.stringify(e))
+          .join(", ");
+      } else if (typeof body.error === "object") {
+        errorMessage = JSON.stringify(body.error);
+      }
+    }
+
     throw new Error(
       body?.error?.message ?? `Request failed: ${response.status}`,
     );
@@ -58,17 +78,17 @@ export const createProduct = (token: string, input: CreateProductInput) =>
 
 export const updateProduct = (
   token: string,
-  id: number,
+  productId: number,
   input: UpdateProductInput,
 ) =>
-  apiFetch<{ data: Product }>(`/api/products/${id}`, {
+  apiFetch<{ data: Product }>(`/api/products/${productId}`, {
     method: "PATCH",
     token,
     body: JSON.stringify(input),
   });
 
-export const deleteProduct = (token: string, id: number) =>
-  apiFetch(`/api/products/${id}`, {
+export const deleteProduct = (token: string, productId: number) =>
+  apiFetch(`/api/products/${productId}`, {
     method: "DELETE",
     token,
   });

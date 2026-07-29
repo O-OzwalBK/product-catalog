@@ -15,6 +15,7 @@ type FormData = {
   password: string;
   confirmPassword: string;
   agreedToTerms: boolean;
+  role: "user" | "merchant";
 };
 
 type FieldErrors = Partial<Record<keyof FormData, string>>;
@@ -27,6 +28,7 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
     agreedToTerms: false,
+    role: "user",
   });
 
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -63,9 +65,9 @@ export default function RegisterPage() {
     setStatus({ loading: true, error: null });
 
     try {
-      const { name, email, password } = result.data;
+      const { name, email, password, role } = result.data;
 
-      await registerUser({ name, email, password });
+      await registerUser({ name, email, password, role });
 
       const response = await signIn("credentials", {
         email,
@@ -144,6 +146,32 @@ export default function RegisterPage() {
           showPasswordToggle
           error={fieldErrors.confirmPassword}
         />
+        <div className="flex gap-4 mb-2">
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            <input
+              type="radio"
+              name="role"
+              value="user"
+              checked={formData.role === "user"}
+              onChange={() =>
+                setFormData((prev) => ({ ...prev, role: "user" }))
+              }
+            />
+            Shopper
+          </label>
+          <label className="flex items-center gap-2 text-sm text-gray-700">
+            <input
+              type="radio"
+              name="role"
+              value="merchant"
+              checked={formData.role === "merchant"}
+              onChange={() =>
+                setFormData((prev) => ({ ...prev, role: "merchant" }))
+              }
+            />
+            Merchant
+          </label>
+        </div>
 
         <div>
           <label className="flex items-start gap-2 text-sm text-gray-600">
