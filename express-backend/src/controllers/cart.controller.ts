@@ -36,7 +36,7 @@ export async function addToCart(req: Request, res: Response) {
   const { productId, quantity } = req.body;
 
   const product = await db.query.products.findFirst({
-    where: eq(products.id, productId),
+    where: eq(products.productId, productId),
   });
 
   if (!product) {
@@ -53,7 +53,7 @@ export async function addToCart(req: Request, res: Response) {
     throw new AppError(
       409,
       "INSUFFICIENT_STOCK",
-      `Only ${product.stock} left in stock`
+      `Only ${product.stock} left in stock`,
     );
   }
 
@@ -82,14 +82,18 @@ export async function updateCartItem(req: Request, res: Response) {
   });
 
   if (!existing) {
-    throw new AppError(404, "CART_ITEM_NOT_FOUND", "This item is not in your cart");
+    throw new AppError(
+      404,
+      "CART_ITEM_NOT_FOUND",
+      "This item is not in your cart",
+    );
   }
 
   if (quantity > existing.product.stock) {
     throw new AppError(
       409,
       "INSUFFICIENT_STOCK",
-      `Only ${existing.product.stock} left in stock`
+      `Only ${existing.product.stock} left in stock`,
     );
   }
 
@@ -112,7 +116,11 @@ export async function removeCartItem(req: Request, res: Response) {
     .returning({ id: cartItems.id });
 
   if (deleted.length === 0) {
-    throw new AppError(404, "CART_ITEM_NOT_FOUND", "This item is not in your cart");
+    throw new AppError(
+      404,
+      "CART_ITEM_NOT_FOUND",
+      "This item is not in your cart",
+    );
   }
 
   res.status(204).send();

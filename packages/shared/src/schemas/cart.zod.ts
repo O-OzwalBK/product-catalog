@@ -10,7 +10,10 @@ export const updateCartItemSchema = z.object({
 });
 
 export const productIdParamSchema = z.object({
-  id: z.coerce.number().int().positive("Product ID must be a positive number"),
+  productId: z.coerce
+    .number()
+    .int()
+    .positive("Product ID must be a positive number"),
 });
 
 export type AddToCartInput = z.infer<typeof addToCartSchema>;

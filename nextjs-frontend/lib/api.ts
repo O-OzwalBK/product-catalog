@@ -35,28 +35,16 @@ async function apiFetch<T>(
   if (!response.ok) {
     const body = await response.json().catch(() => null);
 
-    // Safely extract string message from any error structure
-    let errorMessage = `Request failed with status ${response.status}`;
+    const message =
+      typeof body?.error?.message === "string"
+        ? body.error.message
+        : typeof body?.error === "string"
+          ? body.error
+          : JSON.stringify(
+              body?.error ?? body ?? `Request failed: ${response.status}`,
+            );
 
-    if (body) {
-      if (typeof body.error === "string") {
-        errorMessage = body.error;
-      } else if (typeof body.error?.message === "string") {
-        errorMessage = body.error.message;
-      } else if (typeof body.message === "string") {
-        errorMessage = body.message;
-      } else if (Array.isArray(body.errors)) {
-        errorMessage = body.errors
-          .map((e: any) => e.message || JSON.stringify(e))
-          .join(", ");
-      } else if (typeof body.error === "object") {
-        errorMessage = JSON.stringify(body.error);
-      }
-    }
-
-    throw new Error(
-      body?.error?.message ?? `Request failed: ${response.status}`,
-    );
+    throw new Error(message);
   }
 
   if (response.status == 204) return undefined as T;

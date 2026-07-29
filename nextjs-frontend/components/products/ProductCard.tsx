@@ -62,7 +62,10 @@ export function ProductCard({
         <span className="text-base font-bold">
           ${Number(product.price).toFixed(2)}
         </span>
-        <AddToCartIconButton productId={product.id} stock={product.stock} />
+        <AddToCartIconButton
+          productId={product.productId}
+          stock={product.stock}
+        />
       </div>
     </div>
   );

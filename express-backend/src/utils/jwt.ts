@@ -16,7 +16,5 @@ export function signToken(payload: TokenPayload): string {
 }
 
 export function verifyToken(token: string): TokenPayload {
-  // jwt.verify throws (JsonWebTokenError / TokenExpiredError) on anything
-  // invalid — the caller decides how to translate that into an HTTP response.
   return jwt.verify(token, JWT_SECRET) as TokenPayload;
 }

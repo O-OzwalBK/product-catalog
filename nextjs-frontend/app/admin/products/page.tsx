@@ -43,7 +43,7 @@ const INITIAL_FORM_STATE: CreateProductInput = {
   shortDescription: "",
   longDescription: "",
   imageUrl: "",
-  rating: 5.0,
+  rating: 0.0,
 };
 
 function ProductDashboardContent() {
@@ -84,14 +84,12 @@ function ProductDashboardContent() {
     fetchProducts();
   }, [searchParams]);
 
-  // Open Drawer for Creating
   const handleOpenCreate = () => {
     setEditingProduct(null);
     setFormData(INITIAL_FORM_STATE);
     setIsDrawerOpen(true);
   };
 
-  // Open Drawer for Editing
   const handleOpenEdit = (product: Product) => {
     setEditingProduct(product);
     setFormData({
@@ -108,7 +106,6 @@ function ProductDashboardContent() {
     setIsDrawerOpen(true);
   };
 
-  // Delete Product
   const handleDelete = async (productId: number) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
     setDeletingId(productId);
@@ -138,7 +135,6 @@ function ProductDashboardContent() {
     }
   };
 
-  // Submit Handler for Create / Edit
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const token = (session as any)?.backendToken || "";
@@ -150,7 +146,6 @@ function ProductDashboardContent() {
 
     setIsSubmitting(true);
     try {
-      // 1. Ensure numeric fields are correctly typed
       const payload = {
         ...formData,
         stock: Number(formData.stock),
@@ -159,7 +154,7 @@ function ProductDashboardContent() {
 
       if (editingProduct) {
         // 2. Strip system fields that shouldn't be patched
-        const { id, createdAt, slug, ...updatePayload } = payload as any;
+        const { productId, createdAt, slug, ...updatePayload } = payload as any;
         await updateProduct(token, editingProduct.productId, updatePayload);
       } else {
         const generatedSlug = formData.name
@@ -172,6 +167,7 @@ function ProductDashboardContent() {
       }
 
       setIsDrawerOpen(false);
+      setEditingProduct(null);
       setFormData(INITIAL_FORM_STATE);
       await fetchProducts();
     } catch (err: any) {

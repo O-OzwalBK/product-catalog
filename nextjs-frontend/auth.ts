@@ -18,7 +18,6 @@ declare module "next-auth" {
   }
 }
 
-// 🔑 ADD THIS: Augment AdapterUser to cover the union type
 declare module "next-auth/adapters" {
   interface AdapterUser {
     role?: "user" | "merchant";
@@ -44,17 +43,17 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
         try {
-          const { user, token } = await loginUser({
+          const response = await loginUser({
             email: credentials.email as string,
             password: credentials.password as string,
           });
 
           return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            backendToken: token,
-            role: user.role,
+            id: response.user.id,
+            name: response.user.name,
+            email: response.user.email,
+            backendToken: response.token,
+            role: response.user.role,
           };
         } catch {
           return null;

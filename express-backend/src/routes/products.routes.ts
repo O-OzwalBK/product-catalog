@@ -17,12 +17,6 @@ import {
   deleteProduct,
 } from "../controllers/products.controller";
 
-console.log({
-  productIdParamSchema,
-  createProductSchema,
-  updateProductSchema,
-});
-
 const router = Router();
 
 router.get(

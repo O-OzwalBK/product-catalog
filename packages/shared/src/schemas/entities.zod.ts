@@ -6,7 +6,11 @@ export const productSchema = z.object({
   name: z.string().min(1, "Name is required."),
   slug: z.string().min(1),
   category: z.string().min(1),
-  imageUrl: z.url(),
+  imageUrl: z
+    .string()
+    .refine((val) => val.startsWith("http") || val.startsWith("data:image/"), {
+      message: "Must be a valid URL or Base64 image",
+    }),
   price: z.string().min(1),
   rating: z.string(),
   shortDescription: z.string(),

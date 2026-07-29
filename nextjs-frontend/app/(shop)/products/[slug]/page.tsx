@@ -108,7 +108,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           : "Out of stock"}
       </div>
 
-      <AddToCartButton productId={product.id} stock={product.stock} />
+      <AddToCartButton productId={product.productId} stock={product.stock} />
     </div>
   );
 }

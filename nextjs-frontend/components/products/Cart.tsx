@@ -14,7 +14,7 @@ interface CartProps {
   onCheckout: () => void;
 }
 
-export function Cart({
+export default function Cart({
   isOpen,
   onClose,
   items,
@@ -34,7 +34,6 @@ export function Cart({
     };
   }, [isOpen]);
 
-  // Fallback subtotal calculation if totalAmount is not provided[cite: 6]
   const subtotal =
     totalAmount ?? items.reduce((total, item) => total + item.lineTotal, 0);
 
