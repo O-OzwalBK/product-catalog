@@ -4,10 +4,10 @@ import { defineConfig } from "drizzle-kit";
 const dbUrl =
   process.env.NODE_ENV === "production"
     ? process.env.PRODUCTION_DB_URL
-    : process.env.LOCAL_DB_URL;
+    : process.env.DATABASE_URL;
 
 if (!dbUrl) {
-  throw new Error("DATABASE_URL is not set look inside the .env file");
+  throw new Error("Database URL is not set look inside the .env file");
 }
 
 export default defineConfig({

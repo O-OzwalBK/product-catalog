@@ -2,16 +2,23 @@ import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is not set — copy .env.example to .env and fill it in");
+const dbUrl =
+  process.env.NODE_ENV === "production"
+    ? process.env.PRODUCTION_DB_URL
+    : process.env.DATABASE_URL;
+
+if (!dbUrl) {
+  throw new Error(
+    "Database URL is not set — copy .env.example to .env and fill it in",
+  );
 }
 
-// A connection pool (not a single client) so concurrent requests each get
-// their own connection instead of queueing behind one another.
 export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: dbUrl,
+  ssl:
+    process.env.NODE_ENV === "production"
+      ? { rejectUnauthorized: false }
+      : false,
 });
 
-// `schema` is passed in so `db.query.products.findMany({ with: {...} })`
-// style relational queries are available, on top of the SQL query builder.
 export const db = drizzle(pool, { schema });
