@@ -2,10 +2,7 @@ import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema";
 
-const dbUrl =
-  process.env.NODE_ENV === "production"
-    ? process.env.PRODUCTION_DB_URL
-    : process.env.DATABASE_URL;
+const dbUrl = process.env.DATABASE_URL;
 
 if (!dbUrl) {
   throw new Error(
