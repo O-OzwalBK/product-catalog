@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState } from "react";
 interface CartContextType {
   countInCart: number;
   setCountInCart: React.Dispatch<React.SetStateAction<number>>;
+  refreshKey: number;
   refresh: () => void;
   isCartOpen: boolean;
   openCart: () => void;
@@ -17,10 +18,10 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [countInCart, setCountInCart] = useState(0);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  const refresh = () => {
-    // You can trigger a global cart re-fetch here if needed
-  };
+  // Increment key to notify listening components to re-fetch
+  const refresh = () => setRefreshKey((prev) => prev + 1);
 
   const openCart = () => setIsCartOpen(true);
   const closeCart = () => setIsCartOpen(false);
@@ -31,6 +32,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       value={{
         countInCart,
         setCountInCart,
+        refreshKey,
         refresh,
         isCartOpen,
         openCart,

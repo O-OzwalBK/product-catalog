@@ -24,14 +24,15 @@ import Cart from "../products/Cart";
 export default function Navbar() {
   const router = useRouter();
   const { data: session } = useSession();
- const {
-   countInCart,
-   setCountInCart,
-   refresh,
-   isCartOpen,
-   openCart,
-   closeCart,
- } = useCartCount();
+  const {
+    countInCart,
+    setCountInCart,
+    refresh,
+    refreshKey,
+    isCartOpen,
+    openCart,
+    closeCart,
+  } = useCartCount();
 
   // Menu State
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -43,27 +44,34 @@ export default function Navbar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const token = session?.backendToken;
 
-  // 1. Fetch Cart contents whenever the drawer is opened or item count changes
-useEffect(() => {
-  if (isCartOpen && token) {
+  // Fetch Cart contents whenever the drawer is opened or item count changes
+  useEffect(() => {
+    if (!token) {
+      setCartItems([]);
+      setCartTotal(0);
+      setCountInCart(0);
+      return;
+    }
+
     getCart(token)
       .then((res) => {
         setCartItems(res.data);
         setCartTotal(res.total);
-        // Compute total items count across line items
+
+        // Compute and update initial badge count on load
         const totalItems = res.data.reduce(
           (sum: number, item: CartLine) => sum + item.quantity,
           0,
         );
         setCountInCart(totalItems);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error("Failed to fetch initial cart count:", error);
         setCartItems([]);
         setCartTotal(0);
         setCountInCart(0);
       });
-  }
-}, [isCartOpen, token, setCountInCart]);
+  }, [token, isCartOpen, setCountInCart, refreshKey]);
 
   // 2. Handle User Dropdown click outside
   useEffect(() => {
