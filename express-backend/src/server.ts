@@ -8,11 +8,30 @@ import { errorHandler } from "./middleware/errorHandler";
 
 const app = express();
 
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((url) => url.trim())
+  : [];
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN?.split(",") ?? "*",
-  })
+    origin: (origin, callback) => {
+      // Allow server-to-server or non-browser requests (e.g., Postman)
+      if (!origin) return callback(null, true);
+
+      const isAllowed =
+        allowedOrigins.includes(origin) ||
+        /\.vercel\.app$/.test(new URL(origin).hostname); // Allows any *.vercel.app domain
+
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS policy: Origin not allowed"));
+      }
+    },
+    credentials: true,
+  }),
 );
+
 app.use(express.json());
 
 app.get("/health", (_req, res) => res.status(200).json({ status: "ok" }));
@@ -23,7 +42,9 @@ app.use("/api/cart", cartRoutes);
 
 // 404 for any route that didn't match above
 app.use((_req, res) => {
-  res.status(404).json({ error: { code: "NOT_FOUND", message: "Route not found" } });
+  res
+    .status(404)
+    .json({ error: { code: "NOT_FOUND", message: "Route not found" } });
 });
 
 // Must be registered LAST — Express identifies error middleware by its
