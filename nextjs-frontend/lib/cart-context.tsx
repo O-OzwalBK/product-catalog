@@ -1,41 +1,52 @@
 "use client";
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
-import { useSession } from "next-auth/react";
-import { getCart } from "@/lib/api";
 
-const CartCountContext = createContext<{ countInCart: number; refresh: () => void }>({
-  countInCart: 0,
-  refresh: () => {},
-});
+import React, { createContext, useContext, useState } from "react";
 
-export function CartCountProvider({ children }: { children: React.ReactNode }) {
-  const { data: session, status } = useSession();
-  const [countInCart, setCount] = useState(0);
+interface CartContextType {
+  countInCart: number;
+  setCountInCart: React.Dispatch<React.SetStateAction<number>>;
+  refresh: () => void;
+  isCartOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
+  toggleCart: () => void;
+}
 
-  const refresh = useCallback(async () => {
-    if (!session?.backendToken) {
-      setCount(0);
-      return;
-    }
-    const { data } = await getCart(session.backendToken);
-    setCount(data.reduce((sum, item) => sum + item.quantity, 0));
-  }, [session?.backendToken]);
+const CartContext = createContext<CartContextType | undefined>(undefined);
 
-  useEffect(() => {
-    if (status === "authenticated") refresh();
-  }, [status, refresh]);
+export function CartProvider({ children }: { children: React.ReactNode }) {
+  const [countInCart, setCountInCart] = useState(0);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const refresh = () => {
+    // You can trigger a global cart re-fetch here if needed
+  };
+
+  const openCart = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
+  const toggleCart = () => setIsCartOpen((prev) => !prev);
 
   return (
-    <CartCountContext.Provider value={{ countInCart, refresh }}>
+    <CartContext.Provider
+      value={{
+        countInCart,
+        setCountInCart,
+        refresh,
+        isCartOpen,
+        openCart,
+        closeCart,
+        toggleCart,
+      }}
+    >
       {children}
-    </CartCountContext.Provider>
+    </CartContext.Provider>
   );
 }
 
-export const useCartCount = () => useContext(CartCountContext);
+export function useCartCount() {
+  const context = useContext(CartContext);
+  if (!context) {
+    throw new Error("useCartCount must be used within a CartProvider");
+  }
+  return context;
+}

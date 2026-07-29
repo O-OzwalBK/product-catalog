@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { X, Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import type { CartLine } from "@catalog/shared"; //
 
@@ -91,7 +91,7 @@ export default function Cart({
               {items.map((item) => (
                 <li key={item.productId} className="flex gap-4">
                   {/* Product Image */}
-                  <div className="w-20 h-20 flex-shrink-0 bg-gray-100 rounded-xl overflow-hidden border border-gray-100">
+                  <div className="w-20 h-20 shrink-0 bg-gray-100 rounded-xl overflow-hidden border border-gray-100">
                     <img
                       src={item.product.imageUrl}
                       alt={item.product.name}

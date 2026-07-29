@@ -24,11 +24,17 @@ import Cart from "../products/Cart";
 export default function Navbar() {
   const router = useRouter();
   const { data: session } = useSession();
-  const { countInCart, refresh } = useCartCount();
+ const {
+   countInCart,
+   setCountInCart,
+   refresh,
+   isCartOpen,
+   openCart,
+   closeCart,
+ } = useCartCount();
 
-  // Menu and Cart Drawer States
+  // Menu State
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Cart Data State
   const [cartItems, setCartItems] = useState<CartLine[]>([]);
@@ -38,19 +44,26 @@ export default function Navbar() {
   const token = session?.backendToken;
 
   // 1. Fetch Cart contents whenever the drawer is opened or item count changes
-  useEffect(() => {
-    if (isCartOpen && token) {
-      getCart(token)
-        .then((res) => {
-          setCartItems(res.data);
-          setCartTotal(res.total);
-        })
-        .catch(() => {
-          setCartItems([]);
-          setCartTotal(0);
-        });
-    }
-  }, [isCartOpen, token, countInCart]);
+useEffect(() => {
+  if (isCartOpen && token) {
+    getCart(token)
+      .then((res) => {
+        setCartItems(res.data);
+        setCartTotal(res.total);
+        // Compute total items count across line items
+        const totalItems = res.data.reduce(
+          (sum: number, item: CartLine) => sum + item.quantity,
+          0,
+        );
+        setCountInCart(totalItems);
+      })
+      .catch(() => {
+        setCartItems([]);
+        setCartTotal(0);
+        setCountInCart(0);
+      });
+  }
+}, [isCartOpen, token, setCountInCart]);
 
   // 2. Handle User Dropdown click outside
   useEffect(() => {
@@ -112,7 +125,7 @@ export default function Navbar() {
   };
 
   const handleCheckout = () => {
-    setIsCartOpen(false);
+    closeCart();
     router.push("/checkout");
   };
 
@@ -123,22 +136,37 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-4">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 text-lg font-bold">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-900 text-xs text-white">
-              S
-            </span>
-            ShopCo
-          </Link>
+      <header className="shadow-2xs bg-white">
+        {/* Container: Flex Wrap on Mobile -> 3-Col Grid on Desktop */}
+        <div className="mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-3 max-w-6xl md:grid md:grid-cols-3 md:gap-4 md:py-4">
+          {/* Column 1 / Top Left on Mobile: Logo */}
+          <div className="order-1 flex items-center justify-start">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-lg font-bold"
+            >
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gray-900 text-xs text-white">
+                S
+              </span>
+              ShopCo
+            </Link>
+          </div>
 
-          {/* Search Bar */}
-          <Suspense fallback={<div>Loading search...</div>}>
-            <SearchBar />
-          </Suspense>
+          {/* Column 2 / Row 2 on Mobile: Centered Search Bar */}
+          <div className="order-3 w-full flex items-center justify-center md:order-2 md:w-auto">
+            <Suspense
+              fallback={
+                <div className="w-full text-center text-xs text-gray-400 py-1">
+                  Loading search...
+                </div>
+              }
+            >
+              <SearchBar />
+            </Suspense>
+          </div>
 
-          <div className="ml-auto flex items-center gap-4">
+          {/* Column 3 / Top Right on Mobile: Actions */}
+          <div className="order-2 flex items-center justify-end gap-3 sm:gap-4 md:order-3">
             <Suspense fallback={<div>Loading filters...</div>}>
               <FiltersPopoverTrigger />
             </Suspense>
@@ -152,17 +180,17 @@ export default function Navbar() {
               <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-red-500" />
             </button>
 
-            {/* Shopping Cart Trigger Button */}
+            {/* Desktop Shopping Cart Trigger Button (Hidden on Mobile) */}
             <button
               onClick={() => {
                 if (!session) {
                   router.push("/login");
                 } else {
-                  setIsCartOpen(true);
+                  openCart();
                 }
               }}
               aria-label="Open Cart"
-              className="relative text-gray-500 hover:text-gray-900 focus:outline-none"
+              className="hidden md:flex relative text-gray-500 hover:text-gray-900 focus:outline-none"
             >
               <ShoppingCart className="h-5 w-5" />
               {countInCart > 0 && (
@@ -224,15 +252,6 @@ export default function Navbar() {
                       </Link>
                     )}
 
-                    {/* <Link
-                      href="/account"
-                      onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                    >
-                      <User className="h-4 w-4 text-gray-500" />
-                      My Account
-                    </Link> */}
-
                     <div className="my-1 border-t border-gray-100" />
 
                     <button
@@ -253,7 +272,7 @@ export default function Navbar() {
       {/* Slide-out Cart Drawer Integration */}
       <Cart
         isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
+        onClose={closeCart}
         items={cartItems}
         totalAmount={cartTotal}
         onUpdateQuantity={handleUpdateQuantity}

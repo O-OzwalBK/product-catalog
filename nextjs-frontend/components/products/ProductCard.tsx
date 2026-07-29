@@ -16,10 +16,10 @@ export function ProductCard({
   product: Product;
   preload?: boolean;
 }) {
-  const [wishlisted, setWishlisted] = useState(false); // visual only — no wishlist table/endpoint exists
+  const [wishlisted, setWishlisted] = useState(false);
 
   return (
-    <div className="group relative rounded-2xl border bg-white p-3 transition hover:shadow-md">
+    <div className="group relative rounded-2xl shadow bg-white p-3 transition hover:shadow-md">
       <Link href={`/products/${product.slug}`}>
         <div className="relative aspect-square overflow-hidden rounded-xl bg-gray-100">
           <Image
