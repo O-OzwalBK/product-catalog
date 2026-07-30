@@ -100,7 +100,7 @@ export default function RegisterPage() {
     } catch (error) {
       setStatus({
         loading: false,
-        error: error instanceof Error ? error.message : "Something went wrong.",
+        error: error instanceof Error ? error.message : "Something went wrong when registering.",
       });
       return;
     }

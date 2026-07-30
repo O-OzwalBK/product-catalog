@@ -33,6 +33,24 @@ async function apiFetch<T>(
     cache: "no-store",
   });
 
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("token");
+      localStorage.clear();
+      sessionStorage.clear();
+
+      document.cookie.split(";").forEach((element) => {
+        document.cookie = element
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+
+      window.location.href = "/login";
+    }
+
+    throw new Error("Session invalid. Please login again.");
+  }
+
   if (!response.ok) {
     const body = await response.json().catch(() => null);
 
