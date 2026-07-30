@@ -11,6 +11,13 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
+export const otpPurposeValues = [
+  "email_verification",
+  "password_reset",
+  "login_2fa",
+  "email_change",
+] as const;
+
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
   email: text("email").notNull().unique(),
@@ -21,6 +28,23 @@ export const users = pgTable("users", {
     .notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const otpCodes = pgTable(
+  "otp_codes",
+  {
+    id: serial("id").primaryKey(),
+    email: text("email").notNull(),
+    purpose: varchar("purpose", { enum: otpPurposeValues }).notNull(),
+    otpHash: text("otp_hash").notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    consumedAt: timestamp("consumed_at"),
+    attempts: integer("attempts").notNull().default(0),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique("otp_email_purpose_unique").on(table.email, table.purpose),
+  ],
+);
 
 export const products = pgTable("products", {
   productId: serial("id").primaryKey(),
@@ -54,7 +78,7 @@ export const cartItems = pgTable(
 );
 
 /*
-Relations let us write db.query.cartItems.findMany({ with: { product: true } })
+to enable db.query.cartItems.findMany({ with: { product: true } })
 instead of hand-writing joins every time.
 */
 export const usersRelations = relations(users, ({ many }) => ({
@@ -73,6 +97,8 @@ export const cartItemsRelations = relations(cartItems, ({ one }) => ({
   }),
 }));
 
+export type OtpCode = typeof otpCodes.$inferSelect;
+export type NewOtpCode = typeof otpCodes.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Product = typeof products.$inferSelect;

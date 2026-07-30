@@ -5,11 +5,31 @@ import { db } from "../db";
 import { users } from "../db/schema";
 import { signToken } from "../utils/jwt";
 import { AppError } from "../utils/AppError";
+import { verifyEmailVerificationToken } from "../utils/emailVerificationToken";
 
 const SALT_ROUNDS = 10;
 
 export async function register(req: Request, res: Response) {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, verificationToken } = req.body;
+
+  let tokenPayload;
+  try {
+    tokenPayload = verifyEmailVerificationToken(verificationToken);
+  } catch {
+    throw new AppError(
+      400,
+      "EMAIL_NOT_VERIFIED",
+      "Email verification has expired or is invalid. Please verify your email again.",
+    );
+  }
+
+  if (tokenPayload.email.toLowerCase() !== email.toLowerCase()) {
+    throw new AppError(
+      400,
+      "EMAIL_NOT_VERIFIED",
+      "Verification does not match this email address.",
+    );
+  }
 
   const existing = await db.query.users.findFirst({
     where: eq(users.email, email),

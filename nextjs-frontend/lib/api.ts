@@ -3,6 +3,7 @@ import type {
   CartResponse,
   CreateProductInput,
   LoginInput,
+  OtpPurpose,
   Product,
   ProductListResponse,
   RegisterInput,
@@ -79,6 +80,18 @@ export const deleteProduct = (token: string, productId: number) =>
   apiFetch(`/api/products/${productId}`, {
     method: "DELETE",
     token,
+  });
+
+export const requestOtp = (email: string, purpose: OtpPurpose) =>
+  apiFetch<{ message: string }>("/api/otp/request", {
+    method: "POST",
+    body: JSON.stringify({ email, purpose }),
+  });
+
+export const verifyOtp = (email: string, purpose: OtpPurpose, code: string) =>
+  apiFetch<{ verified: true; verificationToken?: string }>("/api/otp/verify", {
+    method: "POST",
+    body: JSON.stringify({ email, purpose, code }),
   });
 
 export const registerUser = (input: RegisterInput) =>

@@ -2,7 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { registerFormSchema } from "@catalog/shared";
 import InputField from "@/components/ui/InputField";
@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 type FormData = {
   name: string;
   email: string;
+  verificationToken: string;
   password: string;
   confirmPassword: string;
   agreedToTerms: boolean;
@@ -25,30 +26,45 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
+    verificationToken: "",
     password: "",
     confirmPassword: "",
     agreedToTerms: false,
     role: "user",
   });
 
+  const [checkingVerification, setCheckingVerification] = useState(true);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [status, setStatus] = useState<{
     loading: boolean;
     error: string | null;
   }>({ loading: false, error: null });
 
+  useEffect(() => {
+    const stored = sessionStorage.getItem("emailVerification");
+    if (!stored) {
+      router.replace("/verify");
+      return;
+    }
+    try {
+      const { email, verificationToken } = JSON.parse(stored) as {
+        email: string;
+        verificationToken: string;
+      };
+      if (!email || !verificationToken) throw new Error("incomplete");
+      setFormData((prev) => ({ ...prev, email, verificationToken }));
+      setCheckingVerification(false);
+    } catch {
+      router.replace("/verify");
+    }
+  }, [router]);
+
   function handleInputChange(field: keyof FormData) {
-    return (value: string) => {
-      setFormData((currentData) => ({
-        ...currentData,
-        [field]: value,
-      }));
-    };
+    return (value: string) => setFormData((d) => ({ ...d, [field]: value }));
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
-
     const result = registerFormSchema.safeParse(formData);
     if (!result.success) {
       const { fieldErrors: errors } = z.flattenError(result.error);
@@ -58,6 +74,7 @@ export default function RegisterPage() {
         password: errors.password?.[0],
         confirmPassword: errors.confirmPassword?.[0],
         agreedToTerms: errors.agreedToTerms?.[0],
+        verificationToken: errors.verificationToken?.[0],
       });
       return;
     }
@@ -65,9 +82,9 @@ export default function RegisterPage() {
     setStatus({ loading: true, error: null });
 
     try {
-      const { name, email, password, role } = result.data;
-
-      await registerUser({ name, email, password, role });
+      const { name, email, password, role, verificationToken } = result.data;
+      await registerUser({ name, email, password, role, verificationToken });
+      sessionStorage.removeItem("emailVerification");
 
       const response = await signIn("credentials", {
         email,
@@ -88,6 +105,14 @@ export default function RegisterPage() {
       return;
     }
     setStatus({ loading: false, error: null });
+  }
+
+  if (checkingVerification) {
+    return (
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 sm:p-8 shadow-xl text-center text-sm text-gray-400">
+        Checking verification...
+      </div>
+    );
   }
 
   return (
@@ -122,11 +147,10 @@ export default function RegisterPage() {
           id="email"
           type="email"
           value={formData.email}
-          onChange={handleInputChange("email")}
-          placeholder="you@example.com"
-          error={fieldErrors.email}
+          onChange={() => {}}
+          disabled
+          className="bg-gray-50 text-gray-500"
         />
-
         <InputField
           label="Password"
           id="password"
@@ -136,7 +160,6 @@ export default function RegisterPage() {
           showPasswordToggle
           error={fieldErrors.password}
         />
-
         <InputField
           label="Confirm password"
           id="confirmPassword"
@@ -146,6 +169,7 @@ export default function RegisterPage() {
           showPasswordToggle
           error={fieldErrors.confirmPassword}
         />
+
         <div className="flex gap-4 mb-2">
           <label className="flex items-center gap-2 text-sm text-gray-700">
             <input
@@ -153,9 +177,7 @@ export default function RegisterPage() {
               name="role"
               value="user"
               checked={formData.role === "user"}
-              onChange={() =>
-                setFormData((prev) => ({ ...prev, role: "user" }))
-              }
+              onChange={() => setFormData((p) => ({ ...p, role: "user" }))}
             />
             Shopper
           </label>
@@ -165,9 +187,7 @@ export default function RegisterPage() {
               name="role"
               value="merchant"
               checked={formData.role === "merchant"}
-              onChange={() =>
-                setFormData((prev) => ({ ...prev, role: "merchant" }))
-              }
+              onChange={() => setFormData((p) => ({ ...p, role: "merchant" }))}
             />
             Merchant
           </label>
@@ -212,7 +232,6 @@ export default function RegisterPage() {
         <div className="h-px flex-1 bg-gray-200" /> or{" "}
         <div className="h-px flex-1 bg-gray-200" />
       </div>
-
       <button className="flex w-full items-center justify-center gap-2 bg-gray-50 rounded-lg shadow-md py-2.5 text-black text-xs font-semibold hover:bg-gray-100 transition-colors">
         Continue with Google
       </button>

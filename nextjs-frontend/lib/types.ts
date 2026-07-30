@@ -10,4 +10,5 @@ export type {
   AuthUser,
   RegisterInput,
   LoginInput,
+  OtpPurpose,
 } from "@catalog/shared";
