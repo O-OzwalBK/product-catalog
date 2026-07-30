@@ -20,14 +20,13 @@ export async function listProducts(req: Request, res: Response) {
   const { search, category, minPrice, maxPrice, sort, page, limit } =
     req.validatedQuery as unknown as ListProductsQuery;
 
-  // Build up the WHERE clause piece by piece, only including filters that
-  // were actually provided. `and(...conditions)` with an empty array just
-  // means "no filter", which is what we want when nobody searched/filtered.
   const conditions = [];
 
   if (search) {
-    // Debounced search on the frontend just means fewer requests hit this —
-    // the backend still needs to search both name AND description.
+    /*
+    debounced search on the frontend just means fewer requests hit this —
+    the backend still needs to search both name and description.
+    */
     conditions.push(
       or(
         ilike(products.name, `%${search}%`),
@@ -61,8 +60,7 @@ export async function listProducts(req: Request, res: Response) {
 
   const offset = (page - 1) * limit;
 
-  // Run the page query and the total count in parallel — count needs the
-  // same filters (so pagination math is right) but none of the sort/limit.
+  //  run the page query and the total count in parallel
   const [rows, totalRow] = await Promise.all([
     db
       .select()
@@ -130,7 +128,7 @@ export async function createProduct(req: Request, res: Response) {
       .replace(/(^-|-$)+/g, "");
   }
 
-  // Ensure unique slug collision resolution
+  // ensure unique slug collision resolution
   const existingSlug = await db.query.products.findFirst({
     where: eq(products.slug, slug),
   });

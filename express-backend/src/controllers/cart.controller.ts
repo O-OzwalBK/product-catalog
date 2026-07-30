@@ -4,8 +4,10 @@ import { db } from "../db";
 import { cartItems, products } from "../db/schema";
 import { AppError } from "../utils/AppError";
 
-/** Small helper: every cart route scopes by (userId, productId) — this
- * builds that WHERE clause once instead of repeating it in four places. */
+/* 
+helper function: every cart route scopes by (userId, productId)
+this builds that WHERE clause once instead of repeating it in four places.
+*/
 function ownedItem(userId: string, productId: number) {
   return and(eq(cartItems.userId, userId), eq(cartItems.productId, productId));
 }

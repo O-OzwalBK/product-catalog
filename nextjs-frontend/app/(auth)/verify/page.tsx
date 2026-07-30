@@ -25,7 +25,7 @@ function VerifyEmailContent() {
   const [loading, setLoading] = useState(false);
   const { secondsLeft, start } = useCountdown(RESEND_SECONDS);
 
-  async function handleSendCode(e: React.FormEvent) {
+  async function handleSendCode(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     const parsed = emailSchema.safeParse(email);
     if (!parsed.success) {
@@ -82,8 +82,7 @@ function VerifyEmailContent() {
         return;
       }
 
-      // password_reset / login_2fa land here once those flows exist — each
-      // will redirect somewhere purpose-specific instead of "/".
+      // password_reset / login_2fa will be implemented here once those flows exist
       router.push("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Verification failed");

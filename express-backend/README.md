@@ -1,6 +1,6 @@
 # Product Catalog — Backend & Database
 
-This is a working reference implementation of the backend + database half of
+This is a LLM generated working reference implementation of the backend + database half of
 the spec: Express + TypeScript, PostgreSQL, Drizzle ORM, JWT auth. Every
 endpoint below has been run against a real Postgres database — register,
 login, product search/filter/sort, and the full cart lifecycle all verified

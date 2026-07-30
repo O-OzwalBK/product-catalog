@@ -15,9 +15,10 @@ import {
 } from "../controllers/cart.controller";
 
 const router = Router();
-
-// Every route below requires a valid Bearer token — applied once here
-// instead of repeating requireAuth on each route individually.
+/**
+ * Every route below requires a valid Bearer token, applied once here
+ * instead of repeating requireAuth on each route individually.
+*/
 router.use(requireAuth);
 
 router.get("/", asyncHandler(getCart));

@@ -50,8 +50,7 @@ app.use((_req, res) => {
     .json({ error: { code: "NOT_FOUND", message: "Route not found" } });
 });
 
-// Must be registered LAST — Express identifies error middleware by its
-// 4-argument signature (err, req, res, next).
+// Must be registered last
 app.use(errorHandler);
 
 const PORT = Number(process.env.PORT) || 4000;

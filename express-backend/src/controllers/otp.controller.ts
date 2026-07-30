@@ -22,8 +22,7 @@ export async function requestOtp(req: Request, res: Response) {
     where: and(eq(otpCodes.email, email), eq(otpCodes.purpose, purpose)),
   });
 
-  // Cooldown against spam-clicking "resend" — only matters while a code is
-  // still live; a consumed one shouldn't block a fresh request.
+  // otp cooldown just in case if the UI button is bypassed
   if (existing && !existing.consumedAt) {
     const secondsSince = (Date.now() - existing.createdAt.getTime()) / 1000;
     if (secondsSince < OTP_RESEND_COOLDOWN_SECONDS) {
@@ -40,9 +39,6 @@ export async function requestOtp(req: Request, res: Response) {
   const otpHash = hashOtp(code, email, purpose);
   const expiresAt = otpExpiryDate();
 
-  // Same upsert trick as seed.ts's onConflictDoUpdate against products.slug —
-  // here the conflict target is the composite (email, purpose) unique
-  // constraint instead of a single column.
   await db
     .insert(otpCodes)
     .values({

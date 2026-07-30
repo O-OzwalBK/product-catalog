@@ -25,7 +25,7 @@ export default function LoginPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   }
 
-  async function handleSubmit(event: React.SubmitEvent) {
+  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const result = loginSchema.safeParse(formData);
